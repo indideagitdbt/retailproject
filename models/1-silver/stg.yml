@@ -1,0 +1,9 @@
+version: 2
+sources:
+  - name: raw
+    database: WALMARTDB
+    schema: RAW
+    tables:
+      - name: RAW_SALES
+      - name: raw_store
+      - name: RAW_FEATURE
