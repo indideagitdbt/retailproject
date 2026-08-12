@@ -5,5 +5,5 @@ sources:
     schema: RAW
     tables:
       - name: RAW_SALES
-      - name: raw_store
+      - name: RAW_STORE
       - name: RAW_FEATURE
