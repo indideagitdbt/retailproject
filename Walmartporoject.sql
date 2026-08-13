@@ -13,18 +13,6 @@ create or replace table raw_store (
     size int
 );
 
---using snowflake to infer the SCHEMA then you have to load by doing the copy into command
-CREATE OR REPLACE TABLE RAW.RAW_SALES
-USING TEMPLATE (
-    SELECT ARRAY_AGG(OBJECT_CONSTRUCT(*))
-    FROM TABLE(
-        INFER_SCHEMA(
-            LOCATION=>'@walmart_stage/department.csv',
-            FILE_FORMAT=>'csv_format'
-        )
-    )
-);
-
 create or replace table raw_sales (
     store int,
     dept int,
@@ -48,21 +36,31 @@ create or replace table raw_feature(
     unemployment float,
     isholiday boolean
 );
-
-    SELECT *
-    FROM TABLE(
-        INFER_SCHEMA(
-            LOCATION=>'@walmart_stage/fact.csv',
-            FILE_FORMAT=>'my_csv'
-        )
-    );
-    
+--this works but is not secure due to hardcode secret key and access code
 create or replace stage walmart_stage
 url = 's3://dea-walmart-project-i/data/'
 credentials=(aws_key_id='AKIAR4PWB5A23KDIED3O'
 aws_secret_key='z/GvbwTwK8FM/kNur0915yPOLTZpw/vfUIZm/XHy');
 
 ls @walmart_stage;
+
+--THIS is more secure with the iam role
+create or replace storage integration walmart_int
+type = external_stage
+storage_provider = 'S3'
+enabled = TRUE
+storage_aws_role_arn = 'arn:aws:iam::129901914165:role/snowflakeloadrole'
+storage_allowed_locations=('s3://dea-walmart-project-i/data/');
+
+desc integration walmart_int;
+
+--create the STAGE
+create or replace stage walmart_int_stage
+storage_integration= walmart_int
+url='s3://dea-walmart-project-i/data/';
+
+ls @walmart_int_stage;
+
 
 create or replace file format my_csv
 type ='csv'
@@ -71,13 +69,17 @@ skip_header = 1
 null_if=('na','null','','NA');
 
 copy into raw_store
-from @walmart_stage/stores.csv
+from @walmart_int_stage/stores.csv
 file_format=(format_name=my_csv);
 
 copy into raw_sales
-from @walmart_stage/department.csv
+from @walmart_int_stage/department.csv
 file_format=(format_name= my_csv);
 
 copy into raw_feature
-from @walmart_stage/fact.csv
+from @walmart_int_stage/fact.csv
 file_format=(format_name=my_csv);
+
+select * from raw_store;
+SELECT * FROM RAW_SALES;
+select * from raw_feature;

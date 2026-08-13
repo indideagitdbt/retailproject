@@ -1,0 +1,61 @@
+version: 2
+
+models:
+  - name: dim_store
+    description: "Store information"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - store_id 
+              - dept_id 
+
+    columns:
+      - name: store_id 
+        tests:
+          - not_null 
+      - name: dept_id 
+        tests:
+          - not_null
+
+  - name: dim_date
+    description: "dates information "
+    columns:
+      - name: date_id
+        tests:
+          - unique
+          - not_null
+          
+  - name: fact_sales
+    description: "Fact table containing weekly sales and other associated measures"
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - store_id 
+              - dept_id 
+              - date_id
+    columns:
+      - name: store_id 
+        data_tests:
+          - not_null 
+          - relationships:
+              arguments:
+                to: ref('dim_store')
+                field: store_id 
+
+      - name: dept_id
+        tests:
+          - not_null 
+          - relationships:
+              arguments:
+                to: ref('dim_store')
+                field: dept_id
+
+      - name: date_id
+        tests:
+          - not_null 
+          - relationships:
+              arguments:
+                to: ref('dim_date')
+                field: date_id

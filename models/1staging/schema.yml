@@ -1,0 +1,41 @@
+version: 2
+sources:
+  - name: raw
+    description: "Raw walmart data loaded from S3 into Snowflake"
+    database: WALMARTDB
+    schema: RAW
+    tables:
+      - name: RAW_SALES
+        description: "Raw store information"
+      - name: RAW_STORE
+        description: "Raw weekly sales"
+      - name: RAW_FEATURE
+        description: "Raw weather and economic information"
+
+models:
+  - name: stg_store 
+    columns:
+      - name: store_id 
+        tests:
+         - not_null
+        
+  - name: stg_sales 
+    columns:
+      - name: store_id 
+        tests:
+         - not_null
+      - name: dept_id
+        tests:
+          - not_null
+      - name: store_date 
+        tests:
+          - not_null
+          
+  - name: stg_feature
+    columns:
+      - name: store_id 
+        tests:
+          - not_null 
+      - name: store_date 
+        tests:
+          - not_null
