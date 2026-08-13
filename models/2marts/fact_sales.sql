@@ -1,28 +1,24 @@
 {{config(
-    materialized='incremental',
-    incremental_strategy='merge',
-    unique_key=['store_id', 'dept_id', 'date_id'],
-    merge_exclude_columns= ['insert_date']
+    materialized='table'
 )}}
 
 select 
-    s.store_id,
-    s.dept_id, 
-    dd.date_id,
-    s.store_weekly_sales,
-    f.fuel_price,
-    f.store_temperature,
-    f.unemployment,
-    f.cpi,
-    f.markdown1,
-    f.markdown2,
-    f.markdown3,
-    f.markdown4,
-    f.markdown5,
-    current_timestamp() as insert_date,
-    current_timestamp() as update_date
+    store_id,
+    dept_id, 
+    date_id,
+    store_weekly_sales,
+    fuel_price,
+    store_temperature,
+    unemployment,
+    cpi,
+    markdown1,
+    markdown2,
+    markdown3,
+    markdown4,
+    markdown5,
+    dbt_valid_from as insert_date,
+    dbt_updated_at as update_date,
+    dbt_valid_from as vrsn_start_date,
+    coalesce(dbt_valid_to, to_timestamp('9999-12-31')) as vrsn_end_date
 
-from {{ref('stg_sales')}} s
-join {{ref('dim_store')}} ds on ds.store_id = s.store_id and ds.dept_id=s.dept_id
-join {{ref('dim_date')}} dd on dd.store_date = s.store_date
-join {{ref('stg_feature')}} f on f.store_id = s.store_id and f.store_date = s.store_date 
+from {{ref('fact_sales_snapshot')}}
