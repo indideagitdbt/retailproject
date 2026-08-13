@@ -1,4 +1,6 @@
-{{ config(materialized='view')}}
+{{ config({"materialized":'view',
+           "schema": 'staging',
+           })}}
 
 select 
     store as store_id,

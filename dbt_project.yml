@@ -1,7 +1,7 @@
 # Name your project! Project names should contain only lowercase characters
 # and underscores. A good package name should reflect your organization's
 # name or the intended use of these models
-name: 'walmart_project'
+name: 'walmartproject'
 version: '1.0.0'
 config-version: 2
 
@@ -35,11 +35,11 @@ clean-targets:         # directories to be removed by `dbt clean`
 # using the `{{ config(...) }}` macro.
 
 models:
-  walmart_project:
+  walmartproject:
     # Applies to all files under models/example/
     1staging:
       +materialized: view
       +schema: staging
     
-    2marts:
+    2mart:
       +schema: mart
