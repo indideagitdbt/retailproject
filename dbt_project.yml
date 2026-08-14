@@ -43,3 +43,7 @@ models:
     
     2mart:
       +schema: mart
+
+    reporting:
+      +materialized: view
+      +schema: report
