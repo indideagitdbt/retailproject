@@ -36,13 +36,6 @@ create or replace table raw_feature(
     unemployment float,
     isholiday boolean
 );
---this works but is not secure due to hardcode secret key and access code
-create or replace stage walmart_stage
-url = 's3://dea-walmart-project-i/data/'
-credentials=(aws_key_id='AKIAR4PWB5A23KDIED3O'
-aws_secret_key='z/GvbwTwK8FM/kNur0915yPOLTZpw/vfUIZm/XHy');
-
-ls @walmart_stage;
 
 --THIS is more secure with the iam role
 create or replace storage integration walmart_int
@@ -53,8 +46,9 @@ storage_aws_role_arn = 'arn:aws:iam::129901914165:role/snowflakeloadrole'
 storage_allowed_locations=('s3://dea-walmart-project-i/data/');
 
 desc integration walmart_int;
+--then update the iam role with the storage_aws_iam_user_arn and storage_aws_external_id from the storage INTEGRATION
 
---create the STAGE
+--now lets create the STAGE
 create or replace stage walmart_int_stage
 storage_integration= walmart_int
 url='s3://dea-walmart-project-i/data/';
@@ -83,3 +77,11 @@ file_format=(format_name=my_csv);
 select * from raw_store;
 SELECT * FROM RAW_SALES;
 select * from raw_feature;
+
+select distinct
+    st.store,
+    sa.dept,
+    st.size,
+    st.type
+from raw_store st
+join raw_sales sa on st.store = sa.store;
